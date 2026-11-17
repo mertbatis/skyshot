@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SKYSHOT leaderboard</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{--sky:#5ce1ff;--bg:#071528;--muted:rgba(255,255,255,.65);--green:#7dffb2}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:radial-gradient(circle at 30% 0%,#123a66,#071528 60%);color:#fff;font-family:system-ui,"Segoe UI",sans-serif;overflow:hidden}
+header{display:flex;justify-content:space-between;align-items:center;padding:3vmin 4vmin 1vmin}
+h1{margin:0;font-size:7vmin;font-weight:900;letter-spacing:-.02em}h1 span{color:var(--sky)}
+.ev{color:var(--sky);letter-spacing:.25em;text-transform:uppercase;font-weight:800;font-size:1.8vmin}
+.clock{font-size:4vmin;font-weight:800;color:var(--muted)}
+main{display:grid;grid-template-columns:2fr 1fr;gap:3vmin;padding:1vmin 4vmin}
+.card{background:rgba(9,30,58,.82);border:1px solid rgba(92,225,255,.25);border-radius:2vmin;padding:2.4vmin 3vmin}
+h2{margin:0 0 1.4vmin;font-size:2.2vmin;letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}
+table{width:100%;border-collapse:collapse}
+td{padding:.9vmin .6vmin;font-size:3.6vmin;font-weight:800;border-bottom:1px solid rgba(255,255,255,.06)}
+td.r{color:var(--sky);width:3em}td.n{letter-spacing:.15em}td.t{color:var(--muted);font-size:2.2vmin;font-weight:600}td.s{text-align:right}
+tr.new{animation:glow 3s ease-out}
+@keyframes glow{0%{background:rgba(125,255,178,.45)}100%{background:transparent}}
+.side{display:flex;flex-direction:column;gap:3vmin}
+.stat b{display:block;font-size:6vmin}.stat span{color:var(--muted);font-size:2vmin}
+.now{font-size:3vmin;font-weight:800;color:var(--green)}
+.empty{color:var(--muted);font-size:2.6vmin;font-weight:600}
+small.all td{font-size:2.6vmin}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="ev" id="ev"></div><h1>SKY<span>SHOT</span> leaderboard</h1></div>
+  <div class="clock" id="clock"></div>
+</header>
+<main>
+  <section class="card"><h2>Today's top 10</h2><table id="today"></table></section>
+  <section class="side">
+    <div class="card stat"><h2>Now</h2><div class="now" id="now">Waiting for the next player…</div></div>
+    <div class="card stat"><h2>Fastest flick today</h2><b id="fast">—</b><span id="fastWho"></span></div>
+    <div class="card stat"><h2>Runs today</h2><b id="runs">0</b><span id="avg"></span></div>
+    <div class="card"><h2>All-time top 5</h2><table id="all"></table></div>
+  </section>
+</main>
+<script type="module">
+import { top } from './src/board.js';
+import { load, onChange, settings, today } from './src/store.js';
+let lastId = null;
+const row = (e, i, isNew) => `<tr class="${isNew ? 'new' : ''}"><td class="r">${i + 1}</td><td class="n">${e.name}</td><td class="t">${e.tier}</td><td class="s">${e.score}</td></tr>`;
+function render() {
+  const d = today();
+  const list = load();
+  const t = top(list, 10, d);
+  document.getElementById('ev').textContent = settings().eventName;
+  document.getElementById('today').innerHTML = t.length ? t.map((e, i) => row(e, i, e.id === lastId)).join('') : '<tr><td class="empty">No runs yet today.</td></tr>';
+  document.getElementById('all').innerHTML = top(list, 5).map((e, i) => row(e, i, false)).join('');
+  const runs = list.filter((e) => e.day === d);
+  document.getElementById('runs').textContent = String(runs.length);
+  document.getElementById('avg').textContent = runs.length ? `average score ${Math.round(runs.reduce((s, e) => s + e.score, 0) / runs.length)}` : '';
+  const fast = runs.filter((e) => e.stats?.flick?.bestMs).sort((a, b) => a.stats.flick.bestMs - b.stats.flick.bestMs)[0];
+  document.getElementById('fast').textContent = fast ? `${fast.stats.flick.bestMs} ms` : '—';
+  document.getElementById('fastWho').textContent = fast ? `by ${fast.name}` : '';
+}
+onChange((m) => {
+  const now = document.getElementById('now');
+  if (m.type === 'playing') now.textContent = 'A player is on the trial…';
+  if (m.type === 'finished') now.textContent = `Just finished: ${m.score} points`;
+  if (m.type === 'idle') now.textContent = 'Waiting for the next player…';
+  if (m.type === 'run') lastId = m.id;
+  render();
+});
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); render(); }, 15000);
+document.getElementById('clock').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+render();
+</script>
+</body>
+</html>

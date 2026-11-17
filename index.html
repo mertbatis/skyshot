@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SKYSHOT — 60-second aim trial</title>
+<meta name="description" content="A booth-ready, mouse-only aim trial: Flick, Track and Decide in 60 seconds, with a live local leaderboard that works offline.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#071528">
+<link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<section id="attract" class="screen">
+  <div id="cornerHit" title=""></div>
+  <div class="attract-inner">
+    <p class="kicker" id="eventName">Cloud9 x JetBrains booth</p>
+    <h1>SKY<span>SHOT</span></h1>
+    <p class="sub">60-second aim trial · <b>Flick</b> · <b>Track</b> · <b>Decide</b></p>
+    <div class="cta">CLICK ANYWHERE TO PLAY</div>
+    <div class="topbox">
+      <h2>Today's best</h2>
+      <ol id="attractTop"></ol>
+      <p class="plays" id="plays"></p>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="screen" hidden>
+  <div class="res">
+    <p class="kicker">Your run</p>
+    <div class="big"><span id="rScore">0</span><small id="rTier">Fog</small></div>
+    <p id="rTop" class="topflag" hidden>Top 10 today!</p>
+    <p class="beat" id="rBeat"></p>
+    <div class="tiles">
+      <div><b id="rFlick">—</b><span>Flick median</span><i id="rFlickSub"></i></div>
+      <div><b id="rTrack">—</b><span>Time on target</span><i>Track drill</i></div>
+      <div><b id="rDecide">—</b><span>Enemies hit</span><i id="rDecideSub"></i></div>
+      <div><b id="rAcc">—</b><span>Accuracy</span><i>hits / clicks</i></div>
+    </div>
+    <p class="tip" id="rTip"></p>
+    <div id="entry">
+      <p class="ask">Your initials for the leaderboard</p>
+      <div id="initials"></div>
+      <div id="pad"></div>
+    </div>
+    <div id="saved" hidden>
+      <p class="rank"><span id="rRank"></span> · <span id="rRankAll"></span></p>
+      <button id="next" class="primary">NEXT PLAYER</button>
+    </div>
+  </div>
+</section>
+
+<div id="operator" hidden>
+  <div class="op">
+    <h2>Booth operator</h2>
+    <label>Event name <input id="opEvent" maxlength="60"></label>
+    <div class="oprow">
+      <button id="opBoard">Open leaderboard screen</button>
+      <button id="opSound">Sound: on</button>
+      <button id="opCsv">Export runs (CSV)</button>
+    </div>
+    <div class="oprow">
+      <button id="opToday" class="danger">Clear today</button>
+      <button id="opAll" class="danger">Delete all runs</button>
+      <button id="opClose" class="primary">Close</button>
+    </div>
+    <p class="hint">Open this panel with Ctrl+Shift+O, or five quick clicks in the top-left corner. All data stays in this browser.</p>
+  </div>
+</div>
+
+<script type="module" src="src/game.js"></script>
+</body>
+</html>
